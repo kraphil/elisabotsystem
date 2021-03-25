@@ -1,1 +1,1 @@
-web: gunicorn elisaglossary:app
+web: gunicorn webServiceForRentingGlossary:app
