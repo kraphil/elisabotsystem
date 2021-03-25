@@ -61,8 +61,8 @@ messageFromBot = {"conversationId": "1",
 
 
 #Step Two: Read MietGraph
-rentGraphD1 = nx.read_graphml("datasets\MietGraphD1.graphml")
-rentGraphD2 = nx.read_graphml("datasets\MietGraphD2.graphml")
+rentGraphD1 = nx.read_graphml("MietGraphD1.graphml")
+rentGraphD2 = nx.read_graphml("MietGraphD2.graphml")
 
 #Step Three: Search in Graph
 #select data from node "text" where intent is a substring of node "name"
