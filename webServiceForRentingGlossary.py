@@ -132,5 +132,6 @@ def api_response_intent(intent):
 @app.route("/messageRelatedDocuments/<message>", methods=["GET"])
 def api_response_message(message):
     return jsonify(getDoumemtsBasedOnMessage(message))
-app.run(host='0.0.0.0')
+if __name__ == '__main__':
+    app.run(debug=True)
 
