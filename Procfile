@@ -1,1 +1,1 @@
-web: gunicorn webServiceForRentingGlossary:server
+web: gunicorn webServiceForRentingGlossary:app
