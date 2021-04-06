@@ -4,8 +4,8 @@ import networkx as nx
 from markupsafe import escape
 
 # Read MietGraph
-rentGraphD1 = nx.read_graphml("MietGraphD1.graphml")
-rentGraphD2 = nx.read_graphml("MietGraphD2.graphml")
+rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
+rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
 
 
 def searchInKnowledbase(userIntent):
