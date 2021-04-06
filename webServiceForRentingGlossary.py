@@ -73,6 +73,8 @@ def api_response_intent():
 @app.route("/messageRelatedDocuments", methods=["POST"])
 def api_response_message():
     return getDoumemtsBasedOnMessage(request.json)
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 app.run()
