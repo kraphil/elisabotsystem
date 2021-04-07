@@ -44,7 +44,8 @@ def getDocumentsBasedOnIntent(receivedIntent):
 
 
 def extractIntent(userMessage):
-    return userMessage['messages'][0]['data']['content']
+    intent = userMessage['messages'][0]['data']['content']
+    return intent
 
 
 app = flask.Flask(__name__)
