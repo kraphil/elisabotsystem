@@ -44,7 +44,10 @@ def getDocumentsBasedOnIntent(receivedIntent):
 
 
 def extractIntent(userMessage):
-    intent = userMessage['messages'][0]['data']['content']
+    if(len(userMessage) == 0):
+        intent = ""
+    else:
+        intent = userMessage['messages'][0]['data']['content']
     return intent
 
 
@@ -65,6 +68,8 @@ def home():
 @app.route("/messageRelatedDocuments", methods=["POST"])
 def api_response_message():
     intent = extractIntent(request.json)
+    if(len(intent) == 0):
+        return "No intention word detected!"    
     document = getDocumentsBasedOnIntent(intent)
     if(len(document) == 0):
         return f"No related information found for \"{intent}\" in knowledgebase!"
