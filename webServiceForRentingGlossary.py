@@ -4,8 +4,8 @@ import networkx as nx
 from markupsafe import escape
 
 # Read MietGraph
-rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
-rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
+rentGraphD1 = nx.read_graphml("dataset\MietGraphD1.graphml")
+rentGraphD2 = nx.read_graphml("dataset\MietGraphD2.graphml")
 
 
 def searchInKnowledbase(userIntent):
@@ -37,13 +37,14 @@ def extractMessageContents(relatedDocuments):
 
 def getDocumentsBasedOnIntent(receivedIntent):
     relatedDocuments = searchInKnowledbase(receivedIntent)
+    if(len(relatedDocuments) == 0):
+        messages = {}
+        return messages
     return extractMessageContents(relatedDocuments)
 
 
-def getDoumemtsBasedOnMessage(message):
-    # conversationId = message['conversationId']
-    intent = message['messages'][0]['data']['content']
-    return getDocumentsBasedOnIntent(escape(intent))
+def extractIntent(userMessage):
+    return userMessage['messages'][0]['data']['content']
 
 
 app = flask.Flask(__name__)
@@ -60,19 +61,14 @@ def home():
     return """<h1>Retrieve Data From MietGraph</h1><p>A prototype API for retrieving data from renting glossary.</p>"""
 
 
-@app.route("/messageFromBot", methods=["POST"])
-def api_get_message():
-    return getDoumemtsBasedOnMessage(request.json)
-
-
-@app.route("/intentRelatedDocuments/", methods=["POST", "GET"])
-def api_response_intent():
-    return getDocumentsBasedOnIntent(escape(request.args.get('intent', type=str)))
-
-
 @app.route("/messageRelatedDocuments", methods=["POST"])
 def api_response_message():
-    return getDoumemtsBasedOnMessage(request.json)
+    intent = extractIntent(request.json)
+    document = getDocumentsBasedOnIntent(intent)
+    if(len(document) == 0):
+        return f"No related information found for \"{intent}\" in knowledgebase!"
+    return (document['messages']['data']['content'])
+
 
 if __name__ == '__main__':
     app.run(debug=True)
