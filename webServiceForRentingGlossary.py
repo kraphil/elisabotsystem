@@ -67,8 +67,7 @@ def home():
 
 @app.route("/messageRelatedDocuments", methods=["POST"])
 def api_response_message():
-    message = {}
-    message = request.json
+    message =  request.get_json(force=True)
     intent = extractIntent(message)
     if(len(intent) == 0):
         return "No intention word detected!"    
