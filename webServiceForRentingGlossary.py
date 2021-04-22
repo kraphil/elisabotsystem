@@ -1,7 +1,8 @@
+import json
 import flask
 from flask import request
+import requests
 import networkx as nx
-from markupsafe import escape
 
 # Read MietGraph
 rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
@@ -51,6 +52,26 @@ def extractIntent(userMessage):
     return intent
 
 
+def extractConversationId(userMessage):
+    if(len(userMessage) == 0):
+        conversationId = ""
+    else:
+        conversationId = userMessage['conversationId']
+    return conversationId
+
+
+def createAnswer(conversationId, GlossaryDocument):
+    messages = {
+        "conversationId" : conversationId,
+        "type" : "message",
+        "data" : {
+                 "type" : "text/plain",
+                 "content" : GlossaryDocument
+                 }
+    }
+    return json.dumps(messages)
+
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -67,14 +88,21 @@ def home():
 
 @app.route("/messageRelatedDocuments", methods=["POST"])
 def api_response_message():
+    endpointUrl = r"https://cloud02-7c83ec0.prod.1000grad.de/api/api/v1/conversation/send"
     message =  request.get_json(force=True)
+    conversationId = extractConversationId(message)
     intent = extractIntent(message)
     if(len(intent) == 0):
-        return "No intention word detected!"    
-    document = getDocumentsBasedOnIntent(intent)
-    if(len(document) == 0):
-        return f"No related information found for \"{intent}\" in knowledgebase!"
-    return (document['messages']['data']['content'])
+        GlossaryDocument = "No intention word detected!"
+    else:
+        document = getDocumentsBasedOnIntent(intent)
+        if(len(document) == 0):
+            GlossaryDocument = f"No related information found for \"{intent}\" in knowledgebase!"
+        else:
+            GlossaryDocument = document['messages']['data']['content']
+    answer = createAnswer(conversationId, GlossaryDocument)
+    response = requests.post(endpointUrl, data=answer, headers={'content-type': 'application/json'})
+    return (response.json())
 
 
 if __name__ == '__main__':
