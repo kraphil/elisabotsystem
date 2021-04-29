@@ -90,7 +90,7 @@ def home():
 def api_response_message():
     endpointUrl = r"https://cloud02-7c83ec0.prod.1000grad.de/api/api/v1/conversation/send"
     message =  request.get_json(force=True)
-    print("Message sent from bot:\n", message, "\nEnd of message!")
+    
     conversationId = extractConversationId(message)
     intent = extractIntent(message)
     if(len(intent) == 0):
