@@ -6,7 +6,7 @@ import networkx as nx
 
 # Read MietGraph
 rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
-rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
+#rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
 
 
 def searchInKnowledbase(userIntent):
