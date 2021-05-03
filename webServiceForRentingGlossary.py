@@ -6,16 +6,16 @@ import networkx as nx
 
 # Read MietGraph
 rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
-#rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
+rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
 
 
 def searchInKnowledbase(userIntent):
     # select data from node "text" where intent is a substring of node "name"
     relatedDocuments1 = dict(
         (nodes, document['text']) for nodes, document in rentGraphD1.nodes().items() if userIntent in document['name'])
-    #relatedDocuments2 = dict(
-    #    (nodes, document['text']) for nodes, document in rentGraphD2.nodes().items() if userIntent in document['name'])
-    #relatedDocuments1.update(relatedDocuments2)
+    relatedDocuments2 = dict(
+        (nodes, document['text']) for nodes, document in rentGraphD2.nodes().items() if userIntent in document['name'])
+    relatedDocuments1.update(relatedDocuments2)
     return relatedDocuments1
 
 
