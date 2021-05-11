@@ -13,8 +13,8 @@ logging.basicConfig( level=logging.INFO, format="%(asctime)s [%(levelname)s] %(m
 )
 def searchInKnowledbase(userIntent):
     # Read MietGraph
-    rentGraphD1 = nx.read_graphml("dataset\MietGraphD1.graphml")
-    rentGraphD2 = nx.read_graphml("dataset\MietGraphD2.graphml")
+    rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
+    rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
     # select data from node "text" where intent is a substring of node "name"
     relatedDocuments1 = dict(
         (nodes, document['text']) for nodes, document in rentGraphD1.nodes().items() if userIntent in document['name'])
