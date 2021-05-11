@@ -1,15 +1,20 @@
 import json
 import flask
-from flask import request
-import requests
 import networkx as nx
+import requests
+from flask import request
+import logging
 
-# Read MietGraph
-rentGraphD1 = nx.read_graphml("dataset/MietGraphD1.graphml")
-rentGraphD2 = nx.read_graphml("dataset/MietGraphD2.graphml")
-
-
+logging.basicConfig( level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler()
+    ]
+)
 def searchInKnowledbase(userIntent):
+    # Read MietGraph
+    rentGraphD1 = nx.read_graphml("dataset\MietGraphD1.graphml")
+    rentGraphD2 = nx.read_graphml("dataset\MietGraphD2.graphml")
     # select data from node "text" where intent is a substring of node "name"
     relatedDocuments1 = dict(
         (nodes, document['text']) for nodes, document in rentGraphD1.nodes().items() if userIntent in document['name'])
@@ -61,36 +66,46 @@ def extractConversationId(userMessage):
 
 
 def createAnswer(conversationId, GlossaryDocument):
-    messages = {
-        "conversationId" : conversationId,
-        "type" : "message",
-        "data" : {
-                 "type" : "text/plain",
-                 "content" : GlossaryDocument
-                 }
+    payload = {
+      "conversationId" : conversationId,
+      "messages": [
+        {
+          "type" : "message",
+          "data" : {
+            "type" : "text/plain",
+            "content" : GlossaryDocument
+          }
+        }
+      ]
     }
-    return json.dumps(messages)
-
+    return json.dumps(payload)
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-@app.route("/0.0.0.0", methods=["GET"])
+@app.route("/0.0.0.0", methods=["GET","POST"])
 def defaultFunction():
     return """<h1>Retrieve Data From MietGraph</h1><p>A prototype API for retrieving data from renting glossary.</p>"""
 
 
-@app.route("/", methods=["GET"])  # localhost
+@app.route("/", methods=["GET", "POST"])  # localhost
 def home():
-    return """<h1>Retrieve Data From MietGraph</h1><p>A prototype API for retrieving data from renting glossary.</p>"""
+    return """<h1>Retrieve Data From MietGraph</h1><p>A prototype API for retrieving data from renting glossary...</p>"""
 
 
 @app.route("/messageRelatedDocuments", methods=["POST"])
 def api_response_message():
-    endpointUrl = r"https://cloud02-7c83ec0.prod.1000grad.de/api/api/v1/conversation/send"
+    referer = request.headers.get("Referer")
+    if referer is None:
+      referer = request.args.get("referer")
+    referer = referer.replace("//", "https://")
+    # logging.info("____ referer: %s", referer)
+
+    endpointUrl = referer + "/api/v1/conversation/send"
     message =  request.get_json(force=True)
-    
+    logging.info("____ message: %s", message)
+
     conversationId = extractConversationId(message)
     intent = extractIntent(message)
     if(len(intent) == 0):
@@ -101,10 +116,16 @@ def api_response_message():
             GlossaryDocument = f"No related information found for \"{intent}\" in knowledgebase!"
         else:
             GlossaryDocument = document['messages']['data']['content']
+        # logging.info("____ GD: %s", GlossaryDocument)
     answer = createAnswer(conversationId, GlossaryDocument)
-    response = requests.post(endpointUrl, data=answer, headers={'content-type': 'application/json'})
-    return (response.json())
-
+    try:
+      # logging.info("____ endpointUrl: %s", endpointUrl)
+      # logging.info("Request data: {0}".format(answer))
+      response = requests.post(endpointUrl, data=answer, headers={'content-type': 'application/json'})
+      # logging.info("Request endpoint response: {0}".format(response))
+    except requests.exceptions.RequestException as e:
+      logging.debug("Request endpoint error: {0}".format(e))
+    return ('{}', 200)
 
 if __name__ == '__main__':
     app.run(debug=True)
