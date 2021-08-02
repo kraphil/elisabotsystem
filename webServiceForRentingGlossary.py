@@ -139,7 +139,7 @@ def api_response_message():
 
 
 @app.route("/linkToRelatedDocuments", methods=["POST"])
-def api_response_message():
+def api_response_token():
     referer = request.headers.get("Referer")
     if referer is None:
       referer = request.args.get("referer")
