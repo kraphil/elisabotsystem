@@ -138,46 +138,5 @@ def api_response_message():
     return ('{}', 200)
 
 
-@app.route("/linkToRelatedDocuments", methods=["POST"])
-def api_response_token():
-    referer = request.headers.get("Referer")
-    if referer is None:
-      referer = request.args.get("referer")
-    referer = referer.replace("//", "https://")
-    ####
-    logging.info("____ referer: %s", referer)
-
-    endpointUrl = referer + "/api/v1/conversation/send"
-    message =  request.get_json(force=True)
-    ####
-    logging.info("____ message: %s", message)
-
-    conversationId = extractConversationId(message)
-
-    ####tokens = listOfWords(message)
-    tokens = message
-    logging.info("____ tokens: %s", tokens)
-    ######
-
-    if(len(tokens) == 0):
-        GlossaryDocument = "No intention word detected!"
-    else:
-        linksOfTokensDocument = getDocumentsBasedOnToken(tokens)
-        if(len(linksOfTokensDocument) == 0):
-            GlossaryDocument = {}
-        else:
-            GlossaryDocument = linksOfTokensDocument['messages']['data']['content']
-        # logging.info("____ GD: %s", GlossaryDocument)
-    answer = createAnswer(conversationId, GlossaryDocument)
-    try:
-      # logging.info("____ endpointUrl: %s", endpointUrl)
-      # logging.info("Request data: {0}".format(answer))
-      response = requests.post(endpointUrl, data=answer, headers={'content-type': 'application/json'})
-      # logging.info("Request endpoint response: {0}".format(response))
-    except requests.exceptions.RequestException as e:
-      logging.debug("Request endpoint error: {0}".format(e))
-    return ('{}', 200)
-
-
 if __name__ == '__main__':
     app.run(debug=True)
