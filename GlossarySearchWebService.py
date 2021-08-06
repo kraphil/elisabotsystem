@@ -2,6 +2,8 @@ import json
 import flask
 import networkx as nx
 import pandas as pd
+import numpy as np
+import requests
 from flask import request
 import logging
 
@@ -20,39 +22,71 @@ def read_miet_graph_data():
     return rent_graph
 
 
-def add_related_documents(messages, msgType, msgData):
-    messages['type'] = msgType
-    messages['data'] = msgData
-
-def extract_conversationId(userMessage):
-    if (len(userMessage) == 0):
-        conversationId = ""
-    else:
-        conversationId = userMessage['conversationId']
-    return conversationId
+def extract_conversationId(message):
+    return message['conversationId']
 
 
-def createAnswer(metadata, conversationId, endpointBaseUrl, glossaryProfileName):
-    payload = {
-        "messages": metadata["intent"]["output"],
-        "conversationId": conversationId,
-        "endpointBaseUrl": endpointBaseUrl,
-        "glossaryProfileName": glossaryProfileName
-    }
-    return json.dumps(payload)
+def extract_messages(bot_message):
+    return bot_message['messages']
+    # return message['messages'][0]['metaData']
 
-def extractMetadata(message):
-    return message[0].metaData
 
-def getDocumentsURLBasedOnToken(token):
+def extractGlossaryProfileName(message):
+    return message['messages'][0]['metaData']['glossaryProfileName']
+
+
+def extractContent(message):
+    content = message['metaData']['intent']['output'][0]['data']['content']
+    return content
+
+
+def extractTokens(content):
+    tokens = np.unique(content.split(','))
+    return tokens
+
+
+def get_list_of_all_topics_name_url():
     # Read MietGraph
     rentGraph = read_miet_graph_data()
     graph = rentGraph.nodes(data=True)
     # Extract the urls from the graph
     data = {}
-    data = [x[1] for x in graph if token in x[1]['name']]
-    links = pd.DataFrame(data)[['name', 'url']]
-    return links
+    data = [x[1] for x in graph]
+    name_links = pd.DataFrame(data)[['name', 'url']]
+    return name_links
+
+
+def getLinks(name_links, token):
+    name_link = name_links[name_links['name'].str.contains(token, regex=False)]
+    name_link.drop_duplicates().dropna()
+    return name_link
+
+
+def getLinksForTokens(tokens, name_links):
+    results = []
+    for token in tokens:
+        link = getLinks(name_links, token.strip()).values.tolist()
+        results.append(link)
+    return results
+
+
+def check_message_validity(messages):
+    isvalid = False
+    output = messages['messages'][0]['metaData']['intent']['output']
+    for msg in output:
+        if (msg["type"] == 'message' and msg['data'] and msg['type'] == 'text/plain'):
+            isvalid = True
+        else:
+            isvalid = False
+    return isvalid
+
+
+def createAnswer(conversationId, outputMessages):
+    payload = {
+      "conversationId" : conversationId,
+      "messages": outputMessages
+    }
+    return json.dumps(payload)
 
 
 app = flask.Flask(__name__)
@@ -65,38 +99,49 @@ def api_response_token():
     if referer is None:
         referer = request.args.get("referer")
     referer = referer.replace("//", "https://")
-    logging.info("____ referer: %s", referer)
-    endpointBaseUrl = referer
+    # logging.info("____ referer: %s", referer)
+    endpointBaseUrl = referer + '/api/v1/conversation/send'
 
-    messages = request.get_json(force=True)
-    logging.info("____ message: %s", messages)
-    conversationId = extract_conversationId(messages)
-    metadata = extractMetadata(messages)
-    logging.info("____ metadata: %s", metadata)
-    ####tokens = listOfWords(message)
-    tokens = metadata["intent"]["output"]
-    glossaryProfileName = metadata["glossaryProfileName"]
-    logging.info("____ tokens: %s", tokens)
+    bot_message = request.get_json(force=True)
+    # logging.info("____ message: %s", messages)
+    conversationId = extract_conversationId(bot_message)
+    glossaryProfileName = extractGlossaryProfileName(bot_message)
+    messages = extract_messages(bot_message)
+    output_text = "Weitere Informationen erhalten Sie, wenn Sie auf die folgenden Wörter klicken.\n" \
+                  "You can get more information by click on each of the following words."
 
-    if (metadata):
-        links = []
-        for token in tokens:
-            linksOfTokensDocument = getDocumentsURLBasedOnToken(token)
-            if (len(linksOfTokensDocument) == 0):
-                GlossaryDocument = {}
-            else:
-                links.append(linksOfTokensDocument)
-        GlossaryDocument = linksOfTokensDocument['messages']['data']['content']
-        # logging.info("____ GD: %s", GlossaryDocument)
-        answer = createAnswer(links, conversationId, endpointBaseUrl,glossaryProfileName)
-    # try:
-    #     logging.info("____ endpointUrl: %s", endpointBaseUrl)
-    #     logging.info("Request data: {0}".format(answer))
-    #     sendOutputWithLinkedGlossaryWords(answer)
-        # response = requests.post(endpointBaseUrl, data=answer, headers={'content-type': 'application/json'})
-        # logging.info("Request endpoint response: {0}".format(response))
-    # except requests.exceptions.RequestException as e:
-    #     logging.debug("Request endpoint error: {0}".format(e))
+    name_links = get_list_of_all_topics_name_url()
+    outputMessages = []
+    for msg in messages:
+        if (check_message_validity(messages)):
+            content = extractContent(messages)
+            tokens = extractTokens(content)
+            logging.info("____ tokens: %s", tokens)
+            glossaryLinks = getLinksForTokens(tokens, name_links)
+            logging.info("____ glossaryLinks: %s", glossaryLinks)
+
+            htmlContent = '<p>' + output_text + '</p>'
+            for glossaryLink in glossaryLinks:
+                link = '<a href="' + glossaryLink[0][1] + '" target="_self" >' + glossaryLink[0][0] + '</a><br>'
+                htmlContent += link
+                outputMessage = {
+                    'type': 'message',
+                    'data': {
+                        'type': 'text/html',
+                        'content': htmlContent
+                    }
+                }
+        else:
+            outputMessage = msg
+        outputMessages.append(outputMessage)
+    answer = createAnswer(conversationId, outputMessages)
+    try:
+        logging.info("____ endpointUrl: %s", endpointBaseUrl)
+        logging.info("Request data: {0}".format(outputMessages))
+        response = requests.post(endpointBaseUrl, data=answer, headers={'content-type': 'application/json'})
+        logging.info("Request endpoint response: {0}".format(response))
+    except requests.exceptions.RequestException as e:
+        logging.debug("Request endpoint error: {0}".format(e))
     return ('{}', 200)
 
 
