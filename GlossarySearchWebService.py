@@ -93,7 +93,7 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-@app.route("/linkToRelatedDocuments", methods=["POST"])
+@app.route("/linkToGlossary", methods=["POST"])
 def api_response_token():
     referer = request.headers.get("Referer")
     if referer is None:
@@ -105,7 +105,7 @@ def api_response_token():
     bot_message = request.get_json(force=True)
     # logging.info("____ message: %s", messages)
     conversationId = extract_conversationId(bot_message)
-    glossaryProfileName = extractGlossaryProfileName(bot_message)
+    #glossaryProfileName = extractGlossaryProfileName(bot_message)
     messages = extract_messages(bot_message)
     output_text = "Weitere Informationen erhalten Sie, wenn Sie auf die folgenden Wörter klicken.\n" \
                   "You can get more information by click on each of the following words."
@@ -146,4 +146,5 @@ def api_response_token():
 
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)
+
