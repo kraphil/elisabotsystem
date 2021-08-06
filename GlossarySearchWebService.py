@@ -70,11 +70,11 @@ def getLinksForTokens(tokens, name_links):
     return results
 
 
-def check_message_validity(messages):
+def check_message_validity(message):
     isvalid = False
-    output = messages['messages'][0]['metaData']['intent']['output']
+    output = message['metaData']['intent']['output']
     for msg in output:
-        if (msg["type"] == 'message' and msg['data'] and msg['type'] == 'text/plain'):
+        if (msg["type"] == 'message' and msg['data'] and msg['data']['type'] == 'text/plain'):
             isvalid = True
         else:
             isvalid = False
@@ -113,8 +113,8 @@ def api_response_token():
     name_links = get_list_of_all_topics_name_url()
     outputMessages = []
     for msg in messages:
-        if (check_message_validity(messages)):
-            content = extractContent(messages)
+        if (check_message_validity(msg)):
+            content = extractContent(msg)
             tokens = extractTokens(content)
             logging.info("____ tokens: %s", tokens)
             glossaryLinks = getLinksForTokens(tokens, name_links)
