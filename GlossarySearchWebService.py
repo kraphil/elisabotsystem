@@ -103,7 +103,7 @@ def api_response_token():
     endpointBaseUrl = referer + '/api/v1/conversation/send'
 
     bot_message = request.get_json(force=True)
-    # logging.info("____ message: %s", messages)
+    logging.info("____ message: %s", bot_message)
     conversationId = extract_conversationId(bot_message)
     #glossaryProfileName = extractGlossaryProfileName(bot_message)
     messages = extract_messages(bot_message)
