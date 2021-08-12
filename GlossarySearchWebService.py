@@ -122,7 +122,7 @@ def api_response_token():
 
             htmlContent = '<p>' + output_text + '</p>'
             for glossaryLink in glossaryLinks:
-                link = '<a href="' + glossaryLink[0][1] + '" target="_self" >' + glossaryLink[0][0] + '</a><br>'
+                link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
                 htmlContent += link
                 outputMessage = {
                     'type': 'message',
