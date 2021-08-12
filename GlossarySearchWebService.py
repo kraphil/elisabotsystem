@@ -103,12 +103,11 @@ def api_response_token():
     endpointBaseUrl = referer + '/api/v1/conversation/send'
 
     bot_message = request.get_json(force=True)
-    logging.info("____ message: %s", bot_message)
+    # logging.info("____ message: %s", bot_message)
     conversationId = extract_conversationId(bot_message)
     #glossaryProfileName = extractGlossaryProfileName(bot_message)
     messages = extract_messages(bot_message)
-    output_text = "Weitere Informationen erhalten Sie, wenn Sie auf die folgenden Wörter klicken.\n" \
-                  "You can get more information by click on each of the following words."
+    output_text = "Weitere Informationen erhalten Sie, wenn Sie auf die folgenden Wörter klicken."
 
     name_links = get_list_of_all_topics_name_url()
     outputMessages = []
@@ -116,14 +115,11 @@ def api_response_token():
         if (check_message_validity(msg)):
             content = extractContent(msg)
             tokens = extractTokens(content)
-            logging.info("____ tokens: %s", tokens)
+            #logging.info("____ tokens: %s", tokens)
             glossaryLinks = getLinksForTokens(tokens, name_links)
-            logging.info("____ glossaryLinks: %s", glossaryLinks)
-
-            htmlContent = '<p>' + output_text + '</p>'
-            for glossaryLink in glossaryLinks:
-                link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
-                htmlContent += link
+            #logging.info("____ glossaryLinks: %s", glossaryLinks)
+            if len(glossaryLinks)==0:
+                htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
                 outputMessage = {
                     'type': 'message',
                     'data': {
@@ -131,20 +127,31 @@ def api_response_token():
                         'content': htmlContent
                     }
                 }
+            else:
+                htmlContent = '<p>' + output_text + '</p>'
+                for glossaryLink in glossaryLinks:
+                    link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
+                    htmlContent += link
+                    outputMessage = {
+                        'type': 'message',
+                        'data': {
+                            'type': 'text/html',
+                            'content': htmlContent
+                        }
+                    }
         else:
             outputMessage = msg
         outputMessages.append(outputMessage)
     answer = createAnswer(conversationId, outputMessages)
     try:
-        logging.info("____ endpointUrl: %s", endpointBaseUrl)
-        logging.info("Request data: {0}".format(outputMessages))
+        #logging.info("____ endpointUrl: %s", endpointBaseUrl)
+        logging.info("____ Request data: {0}".format(outputMessages))
         response = requests.post(endpointBaseUrl, data=answer, headers={'content-type': 'application/json'})
-        logging.info("Request endpoint response: {0}".format(response))
+        logging.info("____ Request endpoint response: {0}".format(response))
     except requests.exceptions.RequestException as e:
-        logging.debug("Request endpoint error: {0}".format(e))
+        logging.debug("____ Request endpoint error: {0}".format(e))
     return ('{}', 200)
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-
