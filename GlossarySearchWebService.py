@@ -81,6 +81,14 @@ def check_message_validity(message):
     return isvalid
 
 
+def endOfConversation():
+    endOfConversationMessage = {
+        "type": 'event',
+        "name": 'endOfConversation'
+    }
+    return endOfConversationMessage
+
+
 def createAnswer(conversationId, outputMessages):
     payload = {
       "conversationId" : conversationId,
@@ -142,6 +150,7 @@ def api_response_token():
         else:
             outputMessage = msg
         outputMessages.append(outputMessage)
+    outputMessages.append(endOfConversation())
     answer = createAnswer(conversationId, outputMessages)
     try:
         #logging.info("____ endpointUrl: %s", endpointBaseUrl)
