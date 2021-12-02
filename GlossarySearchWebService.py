@@ -100,6 +100,15 @@ def createAnswer(conversationId, outputMessages):
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+@app.route("/0.0.0.0", methods=["GET"])
+def defaultFunction():
+    return """<h1>Glossar</h1>""" 
+
+
+@app.route("/", methods=["GET"])  # localhost
+def home():
+    return """<h1>Glossar</h1>"""
+
 
 @app.route("/linkToGlossary", methods=["POST"])
 def api_response_token():
