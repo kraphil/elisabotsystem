@@ -72,8 +72,8 @@ def getLinksForTokens(tokens, name_links):
 
 def check_message_validity(message):
     isvalid = False
-    print(message)
-    output = message
+    #print(message)
+    output = message['metaData']['intent']['output']
     for msg in output:
         if (msg["type"] == 'message' and msg['data'] and msg['data']['type'] == 'text/plain'):
             isvalid = True
@@ -130,12 +130,12 @@ def api_response_token():
     name_links = get_list_of_all_topics_name_url()
     outputMessages = []
     for msg in messages:
-        if (check_message_validity(msg)):
+        #if (check_message_validity(msg)):
             content = extractContent(msg)
             tokens = extractTokens(content)
             #logging.info("____ tokens: %s", tokens)
             glossaryLinks = getLinksForTokens(tokens, name_links)
-            logging.info("____ glossaryLinks: %s", glossaryLinks)
+            #logging.info("____ glossaryLinks: %s", glossaryLinks)
             if len(glossaryLinks)==0:
                 htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
                 outputMessage = {
@@ -157,8 +157,8 @@ def api_response_token():
                             'content': htmlContent
                         }
                     }
-        else:
-            outputMessage = msg
+        #else:
+         #   outputMessage = msg
         outputMessages.append(outputMessage)
     outputMessages.append(endOfConversation())
     answer = createAnswer(conversationId, outputMessages)
