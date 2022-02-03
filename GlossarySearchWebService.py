@@ -135,9 +135,11 @@ def api_response_token():
         #if (check_message_validity(msg)):
          content = extractContent(msg)
          tokens = extractTokens(content)
-         logging.info("____ tokens: %s", tokens)
+         print(tokens)
+         #logging.info("____ tokens: %s", tokens)
          glossaryLinks = getLinksForTokens(tokens, name_links)
-         logging.info("____ glossaryLinks: %s", glossaryLinks)
+         print(glossaryLinks)
+         #logging.info("____ glossaryLinks: %s", glossaryLinks)
          if len(glossaryLinks)==0:
              htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
              outputMessage = {
