@@ -134,7 +134,7 @@ def api_response_token():
             tokens = extractTokens(content)
             #logging.info("____ tokens: %s", tokens)
             glossaryLinks = getLinksForTokens(tokens, name_links)
-            #logging.info("____ glossaryLinks: %s", glossaryLinks)
+            logging.info("____ glossaryLinks: %s", glossaryLinks)
             if len(glossaryLinks)==0:
                 htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
                 outputMessage = {
@@ -146,7 +146,6 @@ def api_response_token():
                 }
             else:
                 htmlContent = '<p>' + output_text + '</p>'
-                print(*glossaryLinks)
                 for glossaryLink in glossaryLinks:
                     link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
                     htmlContent += link
