@@ -37,7 +37,8 @@ def extractGlossaryProfileName(message):
 
 def extractContent(message):
     print(message)
-    content = message['metaData']['intent']['output'][0]['data']['content']
+    #content = message['metaData']['intent']['output'][0]['data']['content']
+    content = message['data']['content']
     return content
 
 
