@@ -146,7 +146,7 @@ def api_response_token():
                 }
             else:
                 htmlContent = '<p>' + output_text + '</p>'
-                #print(*glossaryLinks)
+                print(*glossaryLinks)
                 for glossaryLink in glossaryLinks:
                     link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
                     htmlContent += link
