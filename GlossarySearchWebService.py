@@ -138,7 +138,7 @@ def api_response_token():
          print(tokens)
          #logging.info("____ tokens: %s", tokens)
          glossaryLinks = getLinksForTokens(tokens, name_links)
-         print(glossaryLinks)
+         print(glossaryLinks[0][1])
          #logging.info("____ glossaryLinks: %s", glossaryLinks)
          if len(glossaryLinks)==0:
              htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
