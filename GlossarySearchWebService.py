@@ -130,36 +130,36 @@ def api_response_token():
     name_links = get_list_of_all_topics_name_url()
     outputMessages = []
     for msg in messages:
-        if (check_message_validity(msg)):
-            content = extractContent(msg)
-            tokens = extractTokens(content)
-            #logging.info("____ tokens: %s", tokens)
-            glossaryLinks = getLinksForTokens(tokens, name_links)
-            #logging.info("____ glossaryLinks: %s", glossaryLinks)
-            if len(glossaryLinks)==0:
-                htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
-                outputMessage = {
-                    'type': 'message',
-                    'data': {
-                        'type': 'text/html',
-                        'content': htmlContent
-                    }
-                }
-            else:
-                htmlContent = '<p>' + output_text + '</p>'
-                for glossaryLink in glossaryLinks:
-                    link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
-                    htmlContent += link
-                    outputMessage = {
-                        'type': 'message',
-                        'data': {
-                            'type': 'text/html',
-                            'content': htmlContent
-                        }
-                    }
-        else:
-            outputMessage = msg
-        outputMessages.append(outputMessage)
+        #if (check_message_validity(msg)):
+         content = extractContent(msg)
+         tokens = extractTokens(content)
+         #logging.info("____ tokens: %s", tokens)
+         glossaryLinks = getLinksForTokens(tokens, name_links)
+         #logging.info("____ glossaryLinks: %s", glossaryLinks)
+         if len(glossaryLinks)==0:
+             htmlContent = '<p>' + "Im Glossar wurden keine entsprechenden Informationen gefunden." + '</p>'
+             outputMessage = {
+                 'type': 'message',
+                 'data': {
+                     'type': 'text/html',
+                     'content': htmlContent
+                 }
+             }
+         else:
+             htmlContent = '<p>' + output_text + '</p>'
+             for glossaryLink in glossaryLinks:
+                 link = '<a href="' + glossaryLink[0][1] + '" target="_blank" >' + glossaryLink[0][0] + '</a><br>'
+                 htmlContent += link
+                 outputMessage = {
+                     'type': 'message',
+                     'data': {
+                         'type': 'text/html',
+                         'content': htmlContent
+                     }
+                 }
+        #else:
+            #outputMessage = msg
+    outputMessages.append(outputMessage)
     outputMessages.append(endOfConversation())
     answer = createAnswer(conversationId, outputMessages)
     try:
