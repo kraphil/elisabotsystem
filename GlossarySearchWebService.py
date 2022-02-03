@@ -73,7 +73,7 @@ def getLinksForTokens(tokens, name_links):
 def check_message_validity(message):
     isvalid = False
     print(message)
-    output = message['metaData']['intent']['output']
+    output = message
     for msg in output:
         if (msg["type"] == 'message' and msg['data'] and msg['data']['type'] == 'text/plain'):
             isvalid = True
