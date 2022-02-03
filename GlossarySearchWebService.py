@@ -127,7 +127,7 @@ def api_response_token():
     conversationId = extract_conversationId(bot_message)
     #glossaryProfileName = extractGlossaryProfileName(bot_message)
     messages = extract_messages(bot_message)
-    output_text = "Weitere Informationen erhalten Sie, wenn Sie auf die folgenden Wörter klicken."
+    output_text = "Weitere Informationen erhalten Sie, wenn Sie auf den folgenden Link klicken."
 
     name_links = get_list_of_all_topics_name_url()
     outputMessages = []
